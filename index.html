@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Synapse Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font: 13px Helvetica, Arial;  background: url('http://img13.deviantart.net/31cf/i/2015/028/8/6/super_hero_whatsapp_background_by_x_ama-d8fr7iz.jpg');color: #585858}
@@ -31,6 +32,12 @@
 </head>
 <body>
 <ul id="messages" style="margin-bottom: 60px;"></ul>
+<span style="
+    position: fixed;
+    bottom: 0;
+    margin-bottom: 50px;
+    margin-left: 9px;
+" id="isKey"> </span>
 <form action="">
     <input id="m" autocomplete="off" /><button>Enviar</button>
 </form>
@@ -41,21 +48,20 @@
     'use strict'
 
     $(function () {
-
         var username;
+        var socket = io();
 
-        $(document).ready(function (){
-           username = prompt('Digite o seu nome:');
+        username = prompt('Digite o seu nome:');
 
-           socket.emit('user connected', username);
-        });
+        socket.emit('user connected', username);
+
 
         if(Notification.permission !== 'granted')
             Notification.requestPermission();
 
 
-        var socket = io();
-        $('form').submit(function(){
+        $('form').submit(function(e){
+            e.preventDefault();
             socket.emit('chat message', {username: username, message: $('#m').val()});
             $('#m').val('');
             return false;
@@ -74,11 +80,54 @@
                         });
                     }
                 }
+
+            scroll();
+            clearKeyStatus();
         });
 
+        // USUÁRIO ENTROU //
         socket.on('user connected', function (user){
             $('#messages').append($('<li style="text-align: center;margin-top: 10px;">').html('<h4>' + user +'</h4>Entrou'));
         });
+
+        // USUÁRIO SAIU //
+        $(window).unload(function(){
+            socket.emit('user disconnected', username);
+        });
+
+        socket.on('user disconnected', function (user) {
+            $('#messages').append($('<li style="text-align: center;margin-top: 10px;">').html('<h4>' + user +'</h4>Saiu'));
+        });
+
+        // USUARIO ESTÁ DIGITANDO //
+        $('#m').on('keyup', function (event) {
+            if(event.key != 'Enter'){
+                if($(this).val() == ''){
+                    socket.emit('clear key');
+
+                }else{
+                    socket.emit('user key', username);
+                }
+            }
+        });
+
+        socket.on('user key', function (user) {
+            if(user != username)
+                $('#isKey').html(user + ' está digitando..');
+        });
+
+        socket.on('clear key', function () {
+           clearKeyStatus();
+        });
+
+        function scroll() {
+            var height = $(document).height();
+            window.scrollTo(0, height + 50);
+        }
+
+        function clearKeyStatus() {
+            $('#isKey').html('');
+        }
 
     });
 </script>
