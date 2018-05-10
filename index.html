@@ -13,10 +13,6 @@
             color: #ffffff;
             border-radius: 2px; }
         .message{
-            background: #ffffff;
-            padding: 13px;
-            border-radius: 2px;
-            box-shadow: 0 1px 1px rgba(0,0,0,.04);
             position: relative;
             margin-left: 15px;
             margin-right: 15px;
@@ -26,6 +22,15 @@
         .message-you{
             background: #DCF8C6;
             border: 1px solid #d6e9c6;
+        }
+
+        .message-content{
+            display: inline-block;
+            background: #ffffff;
+            box-shadow: 0 1px 1px rgba(0,0,0,.04);
+            padding: 8px 10px 7px 10px;
+            border-radius: 15px;
+            border: 1px solid white;
         }
 
     </style>
@@ -55,7 +60,6 @@
 
         socket.emit('user connected', username);
 
-
         if(Notification.permission !== 'granted')
             Notification.requestPermission();
 
@@ -69,9 +73,14 @@
 
         socket.on('chat message', function (objectMessage) {
             var user = objectMessage.username == username ? 'Você' : objectMessage.username;
-            var li = objectMessage.username == username ? '<li class="message message-you" style="text-align:right;">' : '<li class="message">';
+            var li = objectMessage.username == username ? '<li class="message" style="text-align:right;">' : '<li class="message">';
+            var message = objectMessage.username == username ?
+                '<span class="message-content message-you"><b class="user">' + user +'</b><br/><span class="message-body">' + objectMessage.message + '</span></span>'
+                : '<span class="message-content"><b class="user">' + user +'</b><br/><span class="message-body">' + objectMessage.message + '</span></span>';
 
-            $('#messages').append($(li).html('<b>' + user +'</b><span class="message-body">' + ' diz: ' + objectMessage.message + '</span>'));
+
+
+            $('#messages').append($(li).html(message));
                 if(document.hidden){
                     if(objectMessage.username != username){
                         new Notification(objectMessage.username,{
