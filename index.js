@@ -26,16 +26,15 @@ io.on('connection', function(socket){
 
     socket.on('user connected', function (user) {
         io.emit('user connected', user);
-    })
+    });
 
     // USER KEYUP //
     socket.on('user key', function (user) {
         io.emit('user key', user);
-    })
+    });
 
     socket.on('clear key', function () {
         io.emit('clear key');
-    })
-
+    });
 
 });

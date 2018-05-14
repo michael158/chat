@@ -85,15 +85,9 @@
         });
 
         socket.on('chat message', function (objectMessage) {
-            var now = new Date();
-            var hour = now.getHours() + ':' + now.getMinutes();
-
             var user = objectMessage.username == username ? 'Você' : objectMessage.username;
             var li = objectMessage.username == username ? '<li class="message" style="text-align:right;">' : '<li class="message">';
-            var message = objectMessage.username == username ?
-                '<span class="message-content message-you"><span class="message-body">' + objectMessage.message + '</span><span class="hour">'+ hour +'</span></span>'
-                : '<span class="message-content"><b class="user" style="color: '+ objectMessage.color +'">' + user +'</b><br/><span class="message-body">' + objectMessage.message + '</span><span class="hour">'+ hour +'</span></span>';
-
+            var message = makeMessage(objectMessage);
 
             $('#messages').append($(li).html(message));
                 if(document.hidden){
@@ -151,6 +145,40 @@
         function clearKeyStatus() {
             $('#isKey').html('');
         }
+
+
+        function makeMessage(objectMessage)
+        {
+            var now = new Date();
+            var hour = now.getHours() + ':' + now.getMinutes();
+
+            var isLink = checkIsLink(objectMessage.message);
+
+            if(isLink)
+                objectMessage.message = '<a href="' + objectMessage.message +'" target="_blank">'+ objectMessage.message +'</a>';
+
+            var message = null;
+
+            if(objectMessage.username == username){
+
+                message = '<span class="message-content message-you"><span class="message-body">' + objectMessage.message + '</span><span class="hour">'+ hour +'</span></span>';
+            }else{
+                message = '<span class="message-content"><b class="user" style="color: '+ objectMessage.color +'">' + user +'</b><br/><span class="message-body">' + objectMessage.message + '</span><span class="hour">'+ hour +'</span></span>';
+            }
+
+            return message;
+        }
+
+        function checkIsLink(message) {
+            try{
+                new URL(message);
+                return true;
+            }catch(e){
+               return false;
+            }
+        }
+
+
 
     });
 </script>
